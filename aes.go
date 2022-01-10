@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math/big"
 )
 
@@ -66,7 +65,6 @@ func encrypt(seed string, text string)(string, error){
 	encryptedWord := gcm.Seal(nonce, nonce, characters, nil)
 	// Write word into a file. The WriteFile method returns an error if unsuccessful
 
-	err = ioutil.WriteFile("encrypt.js", encryptedWord, 0)
 	// handle this error
 		if err != nil {
 		// print it out
@@ -77,6 +75,11 @@ func encrypt(seed string, text string)(string, error){
 }
 
 func decrypt(encrypted string, seed string)(string, error){
+
+	if len(seed) < 32 {
+		return "", errors.New("Error: seed phrase must be 32 byte long")
+	}
+
 	key := []byte(seed)
 	
 	c, err := aes.NewCipher(key)
@@ -110,10 +113,16 @@ func main(){
 	if err != nil {
 		fmt.Println(err)
 	}
-	encryptedWord, err := encrypt(seed, "Satoshis");
+	encryptedWord, err := encrypt(seed, "Satoshis")
 
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println(encryptedWord)
+	decryptedWord, err := decrypt(encryptedWord, seed)
+	if err != nil {
+		fmt.Println(err)
+	}
+	
+	fmt.Println(decryptedWord)
 }
